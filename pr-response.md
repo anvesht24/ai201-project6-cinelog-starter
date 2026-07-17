@@ -16,14 +16,18 @@
 **How I verified:** Ran `pytest tests/test_watchlist.py -v` — all passed.
 
 ## Comment 4 — Default visibility
-**My position:**
-**Reasoning:**
-**Tradeoff acknowledged:**
+**My position:** I'm keeping `public=True` as the default for watchlists.
+
+**Reasoning:** A watchlist is meant to be seen — it's how other users find out what someone is planning to watch, which supports the "community" part of a community film-tracking app. If watchlists defaulted to private, that discovery function would mostly disappear, since most users won't go out of their way to change a default. Keeping it public by default optimizes for visibility and engagement between users, which is core to what CineLog is for.
+
+**Tradeoff acknowledged:** The risk is that a user adds something more personal or unfinished to their watchlist — an item they're still deciding on, or something a bit off-brand for how they present themselves — without realizing it's visible to everyone by default. Unlike a `CollectionEntry` (a completed, settled fact — "I watched this"), a `WatchlistEntry` reflects an in-progress intention, which is a more exposing thing to share involuntarily. That's part of why the model gives watchlists a `public` toggle at all, while collections have none — the developers already recognized watchlists carry more exposure risk. I'm accepting that risk in exchange for the discovery value, but it's worth flagging that a clearer onboarding hint (e.g., a one-time note the first time a user adds something) could mitigate the downside without changing the default itself.
 
 ## Comment 5 — Sort order
-**My position:**
-**Reasoning:**
-**Engagement with reviewer's point:**
+**My position:** I agree with switching to date-added order (newest first) instead of alphabetical.
+
+**Reasoning:** This also matches the existing precedent in `get_collection()`, which already sorts by `date_added.desc()` — alphabetical order in `get_watchlist()` was actually the inconsistent one, not the norm. Alphabetical sort optimizes for finding a specific known title fast, like a contacts list, but a watchlist is more of a recency-driven feed of "what I'm currently excited about." A user is more likely to want to see what they just added, or clear out the oldest item they've been meaning to get to, than to scan alphabetically for one title.
+
+**Engagement with reviewer's point:** The reviewer's reasoning — "most users want to see what they added recently" — lines up with how the rest of the app already treats film lists, so I don't see a strong reason to keep watchlists as the outlier. The tradeoff I'm accepting is that alphabetical is genuinely better if someone has a long watchlist and is hunting for one specific title they remember by name — date-added order makes that harder. A reasonable follow-up (not implemented here) would be exposing sort order as a query parameter, defaulting to date-added but letting a user request alphabetical when they want it.
 
 ## Comment 6 — Rebase
 **What conflicted:**
