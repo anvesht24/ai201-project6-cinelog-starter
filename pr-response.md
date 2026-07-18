@@ -30,9 +30,11 @@
 **Engagement with reviewer's point:** The reviewer's reasoning — "most users want to see what they added recently" — lines up with how the rest of the app already treats film lists, so I don't see a strong reason to keep watchlists as the outlier. The tradeoff I'm accepting is that alphabetical is genuinely better if someone has a long watchlist and is hunting for one specific title they remember by name — date-added order makes that harder. A reasonable follow-up (not implemented here) would be exposing sort order as a query parameter, defaulting to date-added but letting a user request alphabetical when they want it.
 
 ## Comment 6 — Rebase
-**What conflicted:**
-**How I resolved it:**
-**How I verified no conflict remains:**
+**What conflicted:** While my PR was open, `main` was refactored to change film IDs from integers to UUIDs (`Film.id`, and all foreign keys referencing it, became `db.String(36)`). My `feature/watchlist` branch still used integer `film_id` values in `models.py` (the `WatchlistEntry` model) and in `tests/test_watchlist.py`. When I ran `git rebase origin/main`, the first conflict was in `.gitignore`, where both branches had independently added ignore rules. After resolving that, the rebase completed, but `WatchlistEntry` had been dropped entirely from `models.py` — the refactor commit on `main` only updated the models that existed there at the time (`User`, `Film`, `CollectionEntry`), so replaying history lost my `WatchlistEntry` class in the process.
+
+**How I resolved it:** For `.gitignore`, I merged both versions into one list with no duplicates. For the missing model, I re-added `WatchlistEntry` to `models.py`, updating `film_id` to `db.String(36)` (UUID) to match the new `Film.id` type, consistent with how `CollectionEntry` was already updated by the refactor. I also updated `tests/test_watchlist.py` to use a fake UUID string (`"00000000-0000-0000-0000-000000000000"`) instead of an integer for the nonexistent-film test, matching the pattern in `test_collection.py`.
+
+**How I verified no conflict remains:** Ran `pytest tests/ -v` after each fix — all tests passed with no import errors or type mismatches. Confirmed with `git log --oneline` that the branch history is now linear on top of `origin/main` with no merge commits.
 
 ## PR Description
 <!-- written at the end -->
