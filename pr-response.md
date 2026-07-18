@@ -38,3 +38,17 @@
 
 ## PR Description
 <!-- written at the end -->
+
+## Final Commit History
+\```
+15c51df docs: add rebase notes for comment 6
+5f3a15b fix: restore WatchlistEntry model and update tests to use UUID film_id after rebase
+305b0ff docs: add design decision for comment 5 - sort order
+bc0a8ec fix: sort watchlist by date_added descending instead of alphabetical
+5d5e791 docs: add pr-response entries for comments 1-4
+5c780a2 test: add test for nonexistent film_id in add_to_watchlist
+d68c846 fix: add deduplication check to prevent duplicate watchlist entries
+8e5b978 fix: rename save_to_watchlist to add_to_watchlist per naming convention
+42e331e fix: update film retrieval method to use db.session.get in collection and watchlist services
+7de97c8 feat: add watchlist model and endpoints
+\```
