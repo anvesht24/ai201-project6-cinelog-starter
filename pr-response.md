@@ -1,7 +1,7 @@
 # PR Response Doc — CineLog Watchlist Feature
 
 ## AI Usage
-<!-- fill in at the end -->
+I used Claude throughout this project for: reading and understanding the existing codebase patterns (`collection_service.py`, `test_collection.py`) before making changes; help troubleshooting PowerShell/git commands (venv activation, git rebase syntax, resolving a merge conflict in `.gitignore` and a dropped model class during rebase); and as a sounding board while forming my own arguments for Comments 4 and 5 — I stated my position first, and used AI to pressure-test the reasoning and help me articulate it clearly, but the final positions and tradeoffs are my own.
 
 ## Comment 1 — Rename
 **What I did:** Renamed `save_to_watchlist()` to `add_to_watchlist()` in `services/watchlist_service.py` and updated the call site in `routes/watchlist/watchlist.py` to match the project's `verb_to_noun` convention used by `add_to_collection()`.
@@ -36,8 +36,6 @@
 
 **How I verified no conflict remains:** Ran `pytest tests/ -v` after each fix — all tests passed with no import errors or type mismatches. Confirmed with `git log --oneline` that the branch history is now linear on top of `origin/main` with no merge commits.
 
-## PR Description
-<!-- written at the end -->
 
 ## Final Commit History
 \```
@@ -52,3 +50,26 @@ d68c846 fix: add deduplication check to prevent duplicate watchlist entries
 42e331e fix: update film retrieval method to use db.session.get in collection and watchlist services
 7de97c8 feat: add watchlist model and endpoints
 \```
+
+## PR Description
+
+### What this adds
+This PR adds a watchlist feature to CineLog, letting users save films they want to watch later (separate from their collection of films already watched). It includes:
+- A `WatchlistEntry` model (UUID-based, matching the app's existing ID convention)
+- `add_to_watchlist()` and `get_watchlist()` service functions, following the same naming and deduplication patterns as the existing collection feature
+- REST endpoints exposing these functions
+- Tests covering entry creation, duplicate prevention, and nonexistent-film handling
+
+### Design decisions
+1. **Default visibility (`public=True`)**: Watchlists default to public so other users can see what someone is planning to watch, supporting the app's community/discovery goals. The tradeoff: a user might add something more personal to their watchlist without realizing it's visible by default. Full reasoning in `pr-response.md`, Comment 4.
+2. **Sort order (date-added, descending)**: Switched from alphabetical to date-added order, matching the existing pattern in `get_collection()` and prioritizing recency over alphabetical lookup. Full reasoning in `pr-response.md`, Comment 5.
+
+### How to manually test
+1. Start the app: `python app.py`
+2. Create a user and a film via the existing endpoints (or directly in a Python shell using the models)
+3. Add a film to the watchlist: `POST /watchlist/<user_id>/add` with a valid `film_id`
+4. Try adding the same film again — should return an error, not a duplicate entry
+5. Try adding a nonexistent `film_id` — should return a "film not found" error
+6. Fetch the watchlist: `GET /watchlist/<user_id>` — confirm films are sorted newest-first by date added
+7. Run the full test suite: `pytest tests/ -v` — all 7 tests should pass
+
